@@ -11,6 +11,7 @@ test-training-contracts: ## Run dependency-light model training contract tests
 	@python3 -m unittest discover -s src/training/model_embeddings/multimodal/large/tests -p 'test_*.py'
 	@python3 -m unittest discover -s src/training/model_classifier/safety_classifier/tests -p 'test_*.py'
 	@python3 -m unittest discover -s src/training/model_classifier/classifier_model_fine_tuning_lora/tests -p 'test_*.py'
+	@python3 -m unittest discover -s src/training/model_classifier/modality_routing_classifier/tests -p 'test_*.py'
 	@python3 -m unittest discover -s src/training/model_eval/tests -p 'test_*.py'
 	@"$(AGENT_PYTHON)" -m pytest -q \
 		src/training/model_eval/test_provenance.py \

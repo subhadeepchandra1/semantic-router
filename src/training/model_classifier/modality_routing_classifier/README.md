@@ -69,3 +69,56 @@ Report per-class precision and recall, the confusion matrix, multilingual
 coverage, and failure cases such as requests that mention an image without
 asking to create one. Validate the exported adapter through the router's actual
 modality signal path before treating it as supported.
+
+## Router-Native Evaluation & Graduation Gate (Issue #3198)
+
+Per Decision Record [Routing-Native Model Experiments](../../../../../website/docs/proposals/routing-native-model-experiments.md) (Issue #3198 / Epic #2974), evaluating candidate model families beyond BERT requires two empirical protocols:
+
+### 1. Routing Agreement and Fixed-Policy Controls
+
+Standard accuracy alone is insufficient. Candidates must report per-request routing agreement with the baseline and outperform static cost-matched policy controls:
+
+```bash
+python evaluate_routing_agreement_and_controls.py \
+  --eval-file path/to/test_predictions.jsonl \
+  --output-json eval_report.json
+```
+
+Or pass separate files:
+
+```bash
+python evaluate_routing_agreement_and_controls.py \
+  --ground-truth test_dataset.jsonl \
+  --baseline-preds baseline_preds.jsonl \
+  --candidate-preds candidate_preds.jsonl \
+  --output-json eval_report.json
+```
+
+The script evaluates:
+- **Routing Agreement Rate:** Per-request decision agreement $\mathbb{I}(\hat{y}_{\text{cand}} = \hat{y}_{\text{base}})$.
+- **Disagreement Attribution:** Which model matched ground truth when decisions diverge.
+- **Fixed-Policy Controls:** Compares candidate against `always-cheapest` (100% AR), `always-strongest` (100% BOTH), and `best-fixed-split-matched-cost` (optimal static probability mixture under the candidate's average cost budget).
+- **Graduation Gate:** Verifies Macro F1 parity (within 1%), agreement rate ($\ge 90\%$), positive disagreement attribution, and outperforming the static fixed split.
+
+### 2. Same-Run Latency & Profiling Harness
+
+To avoid runtime drift (where batch shape or warm state changes between runs causing false wins):
+
+```bash
+python same_run_profile_harness.py \
+  --backend torch \
+  --baseline-model models/mmbert32k-modality-classifier \
+  --candidate-model models/candidate-student-classifier \
+  --batch-sizes 1 4 8 16 \
+  --warmup-runs 10 \
+  --eval-runs 50 \
+  --output-json latency_report.json
+```
+
+For quick local or CI verification with simulated models:
+
+```bash
+python same_run_profile_harness.py --backend dummy
+```
+
+The harness executes interleaved trials in the same process with fixed batch shapes and sequence lengths, reporting p50/p90/p95/p99/p99.9 latency, peak RSS memory, and enforcing the $\ge 20\%$ p99 latency reduction gate.

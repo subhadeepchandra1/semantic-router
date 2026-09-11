@@ -15,6 +15,7 @@ without taking over serving-layer scheduling.
 | Proposal | Created | Status | Scope |
 | --- | --- | --- | --- |
 | [Routing Scope: Per-Query and Capacity-Aware Routing](./batch-and-capacity-aware-routing) | 2026-07-14 | Decision record | Keeps semantic routing per-query and capacity handling in the serving layer. |
+| [Routing-Native Model Experiments: Task Contracts, Baselines, and Candidate Gate](./routing-native-model-experiments) | 2026-09-11 | Decision record | Defines task contract (modality routing), unchanged mmBERT baseline, candidate architectures (LFM2.5, SCX, distilled student), routing agreement metrics, cost-matched fixed policy controls, and same-run profiling gates. |
 | [Router Learning](./router-learning-memory-and-adaptations) | 2026-06-20 | Implemented | Online adaptation, route protection, and offline recipe improvement. |
 | [Prompt Classification Routing](./prompt-classification-routing) | 2025-10-08 | Proposal | Keyword, regex, embedding, and classifier signal fusion. |
 
